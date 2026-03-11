@@ -18,7 +18,7 @@ export const SendNewsletterButton = ({
   function handleClick() {
     startTransition(async () => {
       const res = await sendNewsletter(newsletterId)
-      if ("error" in res) setError(res.error ?? "Something went wrong.")
+      if (res.error) setError(res.error.message)
     })
   }
 
