@@ -6,6 +6,7 @@ import { headers } from "next/headers"
 import { parse } from "valibot"
 
 import { EmailTemplate } from "@/components/email-template"
+import { WelcomeEmailTemplate } from "@/components/welcome-email-template"
 import { db } from "@/lib/drizzle"
 import { subscribers } from "@/lib/drizzle/schema"
 import { env } from "@/lib/env.server"
@@ -40,10 +41,17 @@ export async function subscribe(payload: unknown) {
     const subscriber = result[0]
 
     const latest = await findLatestSentNewsletter()
+    const unsubscribeUrl = `${env.NEXT_PUBLIC_BASE_URL}/unsubscribe?token=${subscriber.unsubscribeToken}`
 
-    if (latest) {
-      const tracks = await getPlaylistTracks(latest.spotifyPlaylistUrl)
-      const unsubscribeUrl = `${env.NEXT_PUBLIC_BASE_URL}/unsubscribe?token=${subscriber.unsubscribeToken}`
+    if (!latest) {
+      await resend.emails.send({
+        from: "Khurram <newsletter@khurramali.site>",
+        to: [subscriber.email],
+        subject: "Welcome to Songs I'm Listening To",
+        react: WelcomeEmailTemplate(),
+      })
+    } else {
+      const tracks = latest.tracks ?? await getPlaylistTracks(latest.spotifyPlaylistUrl)
 
       await resend.emails.send({
         from: "Khurram <newsletter@khurramali.site>",
