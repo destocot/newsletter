@@ -8,7 +8,8 @@ import { newsletters } from "@/lib/drizzle/schema"
 import { env } from "@/lib/env.server"
 import { resend } from "@/lib/resend"
 import { getPlaylistTracks } from "@/lib/spotify"
-import { findOneUnsentNewsletter } from "@/resources/newsletters/queries"
+import { NEWSLETTER_NAME } from "@/lib/constants"
+import { countSentNewsletters, findOneUnsentNewsletter } from "@/resources/newsletters/queries"
 import { findAllSubscribersByStatus } from "@/resources/subscribers/queries"
 
 export async function GET(req: NextRequest) {
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
       recipients.map((recipient) => ({
         from: "Khurram <newsletter@khurramali.site>",
         to: [recipient.email],
-        subject: "Songs I'm Listening To",
+        subject: NEWSLETTER_NAME,
         react: NoNewsletterEmailTemplate(),
       }))
     )
@@ -38,10 +39,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "No newsletter found. Sent fallback email." })
   }
 
-  const tracks = await getPlaylistTracks(newsletter.spotifyPlaylistUrl)
+  const [tracks, sentCount] = await Promise.all([
+    getPlaylistTracks(newsletter.spotifyPlaylistUrl),
+    countSentNewsletters(),
+  ])
+  const issueNumber = sentCount + 1
   const subject = newsletter.title
-    ? `Songs I'm Listening To — ${newsletter.title}`
-    : "Songs I'm Listening To"
+    ? `${NEWSLETTER_NAME} #${issueNumber} - ${newsletter.title}`
+    : `${NEWSLETTER_NAME} #${issueNumber}`
 
   await resend.batch.send(
     recipients.map((recipient) => {
@@ -56,6 +61,7 @@ export async function GET(req: NextRequest) {
           spotifyPlaylistUrl: newsletter.spotifyPlaylistUrl,
           tracks,
           unsubscribeUrl,
+          issueNumber,
         }),
       }
     })

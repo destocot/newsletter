@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { NEWSLETTER_NAME } from "@/lib/constants"
 import { findAllPublicNewsletters } from "@/resources/newsletters/queries"
 
 export default async function ArchivePage() {
@@ -26,7 +27,7 @@ export default async function ArchivePage() {
                 className="flex items-center justify-between rounded-lg border px-4 py-3 hover:bg-muted/50 transition-colors"
               >
                 <span className="text-sm font-medium">
-                  {n.title || "Songs I'm Listening To"}
+                  {n.title || NEWSLETTER_NAME}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {new Date(n.sentAt!).toLocaleDateString("en-US", {

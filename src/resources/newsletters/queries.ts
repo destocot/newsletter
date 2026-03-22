@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, isNotNull, lt } from "drizzle-orm"
+import { and, count, desc, eq, isNull, isNotNull, lt } from "drizzle-orm"
 
 import { db } from "@/lib/drizzle"
 import { newsletters } from "@/lib/drizzle/schema"
@@ -21,6 +21,14 @@ export async function findOneUnsentNewsletter() {
     where: and(isNull(newsletters.sentAt), isNull(newsletters.archivedAt)),
     orderBy: [desc(newsletters.createdAt)],
   })
+}
+
+export async function countSentNewsletters() {
+  const result = await db
+    .select({ count: count() })
+    .from(newsletters)
+    .where(isNotNull(newsletters.sentAt))
+  return result[0].count
 }
 
 export async function findAllPublicNewsletters() {

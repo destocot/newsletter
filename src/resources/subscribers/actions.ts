@@ -14,7 +14,9 @@ import { isRateLimited } from "@/lib/rate-limit"
 import { generateResponse } from "@/lib/response"
 import { resend } from "@/lib/resend"
 import { getPlaylistTracks } from "@/lib/spotify"
+import { NEWSLETTER_NAME } from "@/lib/constants"
 import { SubscribeSchema, UnsubscribeSchema } from "@/lib/validators"
+import { countSentNewsletters } from "@/resources/newsletters/queries"
 import { findLatestSentNewsletter } from "@/resources/subscribers/queries"
 
 export async function subscribe(payload: unknown) {
@@ -47,24 +49,28 @@ export async function subscribe(payload: unknown) {
       await resend.emails.send({
         from: "Khurram <newsletter@khurramali.site>",
         to: [subscriber.email],
-        subject: "Welcome to Songs I'm Listening To",
+        subject: `Welcome to ${NEWSLETTER_NAME}`,
         react: WelcomeEmailTemplate(),
       })
     } else {
-      const tracks = latest.tracks ?? await getPlaylistTracks(latest.spotifyPlaylistUrl)
+      const [tracks, issueNumber] = await Promise.all([
+        latest.tracks ? Promise.resolve(latest.tracks) : getPlaylistTracks(latest.spotifyPlaylistUrl),
+        countSentNewsletters(),
+      ])
 
       await resend.emails.send({
         from: "Khurram <newsletter@khurramali.site>",
         to: [subscriber.email],
         subject: latest.title
-          ? `Songs I'm Listening To — ${latest.title}`
-          : "Songs I'm Listening To",
+          ? `${NEWSLETTER_NAME} #${issueNumber} - ${latest.title}`
+          : `${NEWSLETTER_NAME} #${issueNumber}`,
         react: EmailTemplate({
           title: latest.title,
           blurb: latest.blurb,
           spotifyPlaylistUrl: latest.spotifyPlaylistUrl,
           tracks,
           unsubscribeUrl,
+          issueNumber,
         }),
       })
     }

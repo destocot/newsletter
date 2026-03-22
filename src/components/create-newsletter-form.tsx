@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TiptapEditor } from "@/components/tiptap-editor"
+import { NEWSLETTER_NAME } from "@/lib/constants"
 import { type ActionResponse } from "@/lib/response"
 import { createNewsletter } from "@/resources/newsletters/actions"
 
@@ -45,7 +46,7 @@ export const CreateNewsletterForm = () => {
           type="text"
           id="title"
           name="title"
-          placeholder="e.g. Late night drives — defaults to Songs I'm Listening To"
+          placeholder={`e.g. Late night drives — defaults to ${NEWSLETTER_NAME}`}
         />
       </div>
 

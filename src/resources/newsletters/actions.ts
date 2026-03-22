@@ -12,8 +12,10 @@ import { env } from "@/lib/env.server"
 import { generateResponse } from "@/lib/response"
 import { resend } from "@/lib/resend"
 import { getPlaylistTracks } from "@/lib/spotify"
+import { NEWSLETTER_NAME } from "@/lib/constants"
 import { CreateNewsletterSchema } from "@/lib/validators"
 import {
+  countSentNewsletters,
   findOneNewsletterById,
 } from "@/resources/newsletters/queries"
 import { findAllSubscribersByStatus } from "@/resources/subscribers/queries"
@@ -52,14 +54,18 @@ async function _sendToSubscribers(newsletter: typeof newsletters.$inferSelect) {
 
   if (recipients.length === 0) return generateResponse(null, "No active subscribers.")
 
-  const tracks = await getPlaylistTracks(newsletter.spotifyPlaylistUrl)
+  const [tracks, sentCount] = await Promise.all([
+    getPlaylistTracks(newsletter.spotifyPlaylistUrl),
+    countSentNewsletters(),
+  ])
+  const issueNumber = sentCount + 1
 
   await resend.batch.send(
     recipients.map((recipient) => {
       const unsubscribeUrl = `${env.NEXT_PUBLIC_BASE_URL}/unsubscribe?token=${recipient.unsubscribeToken}`
       const subject = newsletter.title
-        ? `Songs I'm Listening To — ${newsletter.title}`
-        : "Songs I'm Listening To"
+        ? `${NEWSLETTER_NAME} #${issueNumber} - ${newsletter.title}`
+        : `${NEWSLETTER_NAME} #${issueNumber}`
       return {
         from: "Khurram <newsletter@khurramali.site>",
         to: [recipient.email],
@@ -70,6 +76,7 @@ async function _sendToSubscribers(newsletter: typeof newsletters.$inferSelect) {
           spotifyPlaylistUrl: newsletter.spotifyPlaylistUrl,
           tracks,
           unsubscribeUrl,
+          issueNumber,
         }),
       }
     }),
@@ -106,7 +113,10 @@ export async function previewNewsletter(newsletterId: string) {
 
   if (!newsletter) return generateResponse(null, "Newsletter not found.")
 
-  const tracks = await getPlaylistTracks(newsletter.spotifyPlaylistUrl)
+  const [tracks, sentCount] = await Promise.all([
+    getPlaylistTracks(newsletter.spotifyPlaylistUrl),
+    countSentNewsletters(),
+  ])
 
   const html = await render(
     EmailTemplate({
@@ -115,6 +125,7 @@ export async function previewNewsletter(newsletterId: string) {
       spotifyPlaylistUrl: newsletter.spotifyPlaylistUrl,
       tracks,
       unsubscribeUrl: "#",
+      issueNumber: sentCount + 1,
     })
   )
 
@@ -126,20 +137,25 @@ export async function sendTestNewsletter(newsletterId: string) {
 
   if (!newsletter) return generateResponse(null, "Newsletter not found.")
 
-  const tracks = await getPlaylistTracks(newsletter.spotifyPlaylistUrl)
+  const [tracks, sentCount] = await Promise.all([
+    getPlaylistTracks(newsletter.spotifyPlaylistUrl),
+    countSentNewsletters(),
+  ])
+  const issueNumber = sentCount + 1
 
   await resend.emails.send({
     from: "Khurram <newsletter@khurramali.site>",
     to: [env.ADMIN_TEST_EMAIL],
     subject: newsletter.title
-        ? `[TEST] Songs I'm Listening To — ${newsletter.title}`
-        : "[TEST] Songs I'm Listening To",
+        ? `[TEST] ${NEWSLETTER_NAME} #${issueNumber} - ${newsletter.title}`
+        : `[TEST] ${NEWSLETTER_NAME} #${issueNumber}`,
     react: EmailTemplate({
       title: newsletter.title,
       blurb: newsletter.blurb,
       spotifyPlaylistUrl: newsletter.spotifyPlaylistUrl,
       tracks,
       unsubscribeUrl: `${env.NEXT_PUBLIC_BASE_URL}/unsubscribe?token=test`,
+      issueNumber,
     }),
   })
 

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { NEWSLETTER_NAME } from "@/lib/constants"
 import { findOneNewsletterById } from "@/resources/newsletters/queries"
 
 interface Props {
@@ -21,7 +22,7 @@ export default async function ArchiveNewsletterPage({ params }: Props) {
           ♪ &nbsp; archive
         </p>
         <h1 className="text-2xl font-bold tracking-tight">
-          {newsletter.title || "Songs I'm Listening To"}
+          {newsletter.title || NEWSLETTER_NAME}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           {new Date(newsletter.sentAt).toLocaleDateString("en-US", {

@@ -8,6 +8,8 @@ import {
   Text,
 } from "@react-email/components"
 
+import { NEWSLETTER_NAME } from "@/lib/constants"
+
 const accent = "#1a7a3f"
 const muted = "#5c7a68"
 const primary = "#1a2e22"
@@ -42,7 +44,7 @@ export const NoNewsletterEmailTemplate = () => {
               marginTop: "0",
             }}
           >
-            Songs I&apos;m Listening To
+            {NEWSLETTER_NAME}
           </Heading>
 
           <Text style={{ color: muted, fontSize: "13px", marginTop: "0" }}>
@@ -66,8 +68,7 @@ export const NoNewsletterEmailTemplate = () => {
           <Hr style={{ borderColor: divider, margin: "36px 0 16px" }} />
 
           <Text style={{ fontSize: "12px", color: muted, lineHeight: "1.6" }}>
-            You&apos;re receiving this because you subscribed to Songs I&apos;m
-            Listening To.
+            You&apos;re receiving this because you subscribed to {NEWSLETTER_NAME}.
           </Text>
         </Container>
       </Body>

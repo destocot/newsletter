@@ -10,6 +10,8 @@ import {
   Text,
 } from "@react-email/components"
 
+import { NEWSLETTER_NAME } from "@/lib/constants"
+
 import { SpotifyTrack } from "@/lib/spotify"
 
 interface EmailTemplateProps {
@@ -18,6 +20,7 @@ interface EmailTemplateProps {
   spotifyPlaylistUrl: string
   tracks: SpotifyTrack[]
   unsubscribeUrl: string
+  issueNumber: number
 }
 
 const accent = "#1a7a3f"
@@ -31,6 +34,7 @@ export const EmailTemplate = ({
   spotifyPlaylistUrl,
   tracks,
   unsubscribeUrl,
+  issueNumber,
 }: EmailTemplateProps) => {
   return (
     <Html lang="en">
@@ -60,7 +64,7 @@ export const EmailTemplate = ({
               marginTop: "0",
             }}
           >
-            Songs I&apos;m Listening To
+            {NEWSLETTER_NAME} No. {issueNumber}
           </Heading>
 
           {title && (
@@ -87,16 +91,8 @@ export const EmailTemplate = ({
 
           <Hr style={{ borderColor: divider, margin: "24px 0" }} />
 
-          {/* Blurb — rendered from Tiptap HTML */}
-          <div
-            dangerouslySetInnerHTML={{ __html: blurb }}
-            style={{ fontSize: "15px", lineHeight: "1.7", color: primary }}
-          />
-
           {tracks.length > 0 && (
             <>
-              <Hr style={{ borderColor: divider, margin: "28px 0" }} />
-
               <Heading
                 as="h2"
                 style={{
@@ -157,14 +153,21 @@ export const EmailTemplate = ({
                   Open Full Playlist →
                 </Link>
               </Section>
+
+              <Hr style={{ borderColor: divider, margin: "28px 0" }} />
             </>
           )}
+
+          {/* Blurb — rendered from Tiptap HTML */}
+          <div
+            dangerouslySetInnerHTML={{ __html: blurb }}
+            style={{ fontSize: "15px", lineHeight: "1.7", color: primary }}
+          />
 
           <Hr style={{ borderColor: divider, margin: "36px 0 16px" }} />
 
           <Text style={{ fontSize: "12px", color: muted, lineHeight: "1.6" }}>
-            You&apos;re receiving this because you subscribed to Songs I&apos;m
-            Listening To.{" "}
+            You&apos;re receiving this because you subscribed to {NEWSLETTER_NAME}.{" "}
             <Link href={unsubscribeUrl} style={{ color: muted }}>
               Unsubscribe
             </Link>

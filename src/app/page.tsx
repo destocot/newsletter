@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { NEWSLETTER_NAME } from "@/lib/constants"
 import { SubscribeForm } from "@/components/subscribe-form"
 
 export default function Page() {
@@ -18,9 +19,7 @@ export default function Page() {
         </p>
 
         <h1 className="text-5xl font-bold tracking-tight mb-4">
-          Songs I&apos;m
-          <br />
-          Listening To
+          {NEWSLETTER_NAME}
         </h1>
 
         <p className="text-muted-foreground max-w-xs mb-10 leading-relaxed font-light">
