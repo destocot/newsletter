@@ -13,6 +13,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: NEWSLETTER_NAME,
   description: "A weekly newsletter about music I love.",
+  openGraph: {
+    images: ["opengraph-image.png"],
+  },
 }
 
 export default function RootLayout({
