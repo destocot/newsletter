@@ -9,8 +9,12 @@ import { env } from "@/lib/env.server"
 import { resend } from "@/lib/resend"
 import { getPlaylistTracks } from "@/lib/spotify"
 import { NEWSLETTER_NAME } from "@/lib/constants"
-import { countSentNewsletters, findOneUnsentNewsletter } from "@/resources/newsletters/queries"
+import {
+  countSentNewsletters,
+  findOneUnsentNewsletter,
+} from "@/resources/newsletters/queries"
 import { findAllSubscribersByStatus } from "@/resources/subscribers/queries"
+import { revalidatePath } from "next/cache"
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization")
@@ -33,10 +37,12 @@ export async function GET(req: NextRequest) {
         to: [recipient.email],
         subject: NEWSLETTER_NAME,
         react: NoNewsletterEmailTemplate(),
-      }))
+      })),
     )
 
-    return NextResponse.json({ message: "No newsletter found. Sent fallback email." })
+    return NextResponse.json({
+      message: "No newsletter found. Sent fallback email.",
+    })
   }
 
   const [tracks, sentCount] = await Promise.all([
@@ -64,7 +70,7 @@ export async function GET(req: NextRequest) {
           issueNumber,
         }),
       }
-    })
+    }),
   )
 
   await db
@@ -72,5 +78,9 @@ export async function GET(req: NextRequest) {
     .set({ sentAt: new Date(), tracks })
     .where(eq(newsletters.id, newsletter.id))
 
-  return NextResponse.json({ message: `Sent to ${recipients.length} subscribers.` })
+  revalidatePath("/archive")
+
+  return NextResponse.json({
+    message: `Sent to ${recipients.length} subscribers.`,
+  })
 }
