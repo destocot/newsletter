@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { theme } from "@/lib/colors"
 
-const BG_COLOR = "rgb(43, 80, 55)"
+const BG_COLOR = theme.avatarBg
 const CANVAS_SIZE = 1080
 const HALF = CANVAS_SIZE / 2
 const LETTERS: [string, string, number, number][] = [

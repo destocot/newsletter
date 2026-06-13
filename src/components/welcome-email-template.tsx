@@ -9,17 +9,15 @@ import {
 } from "@react-email/components"
 
 import { NEWSLETTER_NAME } from "@/lib/constants"
+import { theme } from "@/lib/colors"
 
-const accent = "#1a7a3f"
-const muted = "#5c7a68"
-const primary = "#1a2e22"
-const divider = "#cde0d5"
+const { primary, accent, muted, divider, bg } = theme
 
 export const WelcomeEmailTemplate = () => {
   return (
     <Html lang="en">
       <Head />
-      <Body style={{ backgroundColor: "#f2f8f4", fontFamily: "sans-serif" }}>
+      <Body style={{ backgroundColor: bg, fontFamily: "sans-serif" }}>
         <Container
           style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px" }}
         >
